@@ -4,6 +4,10 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /static/css
+  static_dir: static/css
+- url: /static/js
+  static_dir: static/js
 - url: /.*
   script: item_tracker.app
 
