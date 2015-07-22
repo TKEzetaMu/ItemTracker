@@ -10,18 +10,21 @@
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/static/css/global.css">
+
+	<meta name="viewport" content="width=device-width" />
 </head>
 <body>
-	<h2>Items Needing Approval</h2>
-	<ul>
-		<li>Paper Towels</li>
-		<li>Toilet Paper</li>
-	</ul>
+	<div class="page">
+	<div class="top_bar">
+		<span id='top_font'>Item Tracker</span>
+		<span id='top_button'><a href='#'><span class="glyphicon glyphicon-plus"></span></a></span>
+	</div>
+	<!--  React Stuff -->
 	<div id='content'>
 		<div id="content"></div>
     <script type="text/jsx" src='/static/js/app.js'>
-
     </script>
 	</div>
+</div>
 </body>
 </html>

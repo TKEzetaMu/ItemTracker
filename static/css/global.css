@@ -1,0 +1,103 @@
+#centered{
+  text-align: center;
+}
+
+#top_font{
+  font-size: 2em;
+  padding-left: 1em;
+}
+
+#top_button{
+  padding-right: 1em;
+  float: right;
+  font-size: 2em;
+}
+
+#top_button a{
+  color: white;
+  text-shadow: 1px 1px 1px #000000;
+  -o-transition:.5s;
+  -ms-transition:.5s;
+  -moz-transition:.5s;
+  -webkit-transition:.5s;
+  /* ...and now for the proper property */
+  transition:.5s;
+}
+
+#top_button a:hover{
+  text-shadow: 2px 2px 2px #000000;
+  font-size: 1.1em;
+}
+
+
+
+#date{
+  padding-right: 0.5em;
+  float: right;
+
+
+}
+
+#status_message{
+
+  padding-left: 1em;
+  display: inline-block;
+}
+
+#date, #status_message{
+  vertical-align:0.7em;
+  color: rgb(123, 125, 122);
+}
+
+.item{
+  border-style:solid;
+  border-width: thin;
+  border-color: rgb(232, 232, 232);
+  border-bottom: 0px;
+  border-left: 0px;
+  border-right: 0px;
+
+}
+
+#content{
+  margin-top: 1em;
+  box-shadow: 1px 1px 1px #000000;
+  padding: 1em;
+  width: 80%;
+  margin-left: 10%;
+  background-color: white;
+}
+
+@media (max-width: 968px) {
+  #content{
+    padding: 1em;
+    width: 100%;
+    margin-left: 0%;
+  }
+}
+
+.page, html{
+  background-color: rgb(236, 232, 231);
+  margin-bottom: 0px;
+  height: 100%;
+}
+
+.itemName{
+  font-size: 2em;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 1em;
+}
+
+.top_bar{
+  background-color: rgb(227, 58, 35);
+  color: white;
+  margin-top: 0em !important;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  box-shadow: 1px 2px 1px 1px rgb(195, 194, 187);
+}
+
+.reason{
+  padding-left: 2em;
+}
