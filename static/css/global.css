@@ -59,22 +59,48 @@
 
 }
 
+#item-list{
+  margin-right: 1em;
+  width: 70%;
+  float: right;
+}
+
 #content{
-  margin-top: 1em;
-  box-shadow: 1px 1px 1px #000000;
-  padding: 1em;
-  width: 80%;
-  margin-left: 10%;
-  background-color: white;
+  float: left;
+  min-width: 400px;
+  padding-right: 20px;
+}
+
+@media (min-width: 968px) and (max-width: 1520px) {
+  #content{
+    margin-right: 16px;
+    width: 700px;
+    float: right;
+  }
 }
 
 @media (max-width: 968px) {
-  #content{
+  #item-list{
     padding: 1em;
     width: 100%;
     margin-left: 0%;
+    margin-right: 0%;
   }
 }
+
+#content-menu-hidden{
+  width: 80%;
+  margin-right: 10%;
+  float: right;
+}
+
+.material-card{
+  margin-top: 1em;
+  box-shadow: 1px 1px 1px #000000;
+  padding: 1em;
+  background-color: white;
+}
+
 
 .page, html{
   background-color: rgb(236, 232, 231);
@@ -96,6 +122,39 @@
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   box-shadow: 1px 2px 1px 1px rgb(195, 194, 187);
+}
+
+.triangle1 {
+    width: 0;
+    height: 0;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+
+    border-bottom: 50px solid grey;
+}
+
+.item_form{
+  background-color: white;
+  text-align: center;
+  padding: 1em;
+}
+
+.input-element{
+  margin-bottom: 1em;
+}
+
+#input-form{
+  width: 15em;
+  margin-right: 1em;
+  float: right;
+  margin-top: 0em;
+}
+
+#placehold{
+  width: 15em;
+  height: 1px;
+  float: right;
+  margin-right: 1em;
 }
 
 .reason{

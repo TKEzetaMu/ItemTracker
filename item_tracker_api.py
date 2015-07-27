@@ -87,10 +87,15 @@ class ItemsApi(remote.Service):
     path='item', http_method='POST',
     name='items.make')
     def make_item(self, request):
-        item = ItemModel(name = request.name, reason = request.reason, link = request.link, cryso_approved = False, pylo_approved = False, status = 0)
-        item.put()
-        response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat())
-        return response
+        try:
+            item = ItemModel(name = request.name, reason = request.reason, link = request.link, cryso_approved = False, pylo_approved = False, status = 0)
+            item.put()
+            response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat())
+            return response
+        except ValueError:
+            self.error(401)
+
+
 
     @endpoints.method(ChangeItemRequestResponse, ChangeItemRequestResponse,
     path='item/change', http_method = 'PUT',

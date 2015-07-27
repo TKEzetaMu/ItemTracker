@@ -80,22 +80,116 @@ var ItemList = React.createClass({
     });
     return (
       <div className='items'>
-        {itemNodes}
+        {this.state.items != 0 ? itemNodes : ''}
       </div>
     );
 
   }
 });
 
-var CommentBox = React.createClass({
+var NewItemRequest = React.createClass({
+  submitForm: function(e){
+    e.preventDefault();
+    var name = React.findDOMNode(this.refs.name_).value;
+    var email = React.findDOMNode(this.refs.email).value;
+    var url = React.findDOMNode(this.refs.url).value;
+    var reason = React.findDOMNode(this.refs.reason).value;
+
+    if(!name || !email || !reason){
+      return;
+    }
+
+
+
+    var data_;
+
+    data_ = {
+      'name':name,
+      'link':url,
+      'reason':reason
+    };
+    console.log(data_);
+    $.ajax({
+      url: '/_ah/api/items_api/v1/item',
+      dataType: 'json',
+      type: 'POST',
+      data: JSON.stringify(data_),
+      success: function(data) {
+        console.log("Sucess!");
+        React.findDOMNode(this.refs.name_).value = '';
+        React.findDOMNode(this.refs.email).value = '';
+        React.findDOMNode(this.refs.url).value = '';
+        React.findDOMNode(this.refs.reason).value = '';
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error('/_ah/api/items_api/v1/item', status, err.toString());
+      }.bind(this)
+    });
+
+
+    return;
+  },
+  render: function(){
+    return (
+      <div className = "material-card" id = "input-form">
+        <form className='item_form' onSubmit={this.submitForm}>
+          <input type='text' ref='name_' placeholder='Item Name' className='input-element' required/><br/>
+          <input type='email' ref='email' placeholder='E-Mail' className='input-element' required/><br/>
+          <input type='url' ref='url' placeholder='Link to Item' className='input-element'/><br/>
+          <textarea row='40' ref='reason' columns='4' placeholder='Reason' className='input-element' required>
+          </textarea><br/>
+          <input type='submit' placeholder='Request Item'/>
+        </form>
+      </div>
+    );
+  }
+});
+
+var Placehold = React.createClass({
+  render: function(){
+    return(<div id='placehold'>
+
+    </div>);
+
+
+  }
+});
+
+var NavBar = React.createClass({
+  getInitialState: function(){
+    return {
+      inputHidden: true
+    };
+  },
+  toggle: function(){
+    this.setState({ inputHidden: !this.state.inputHidden });
+  },
+  render: function(){
+    return (
+      <div>
+      <div className="top_bar">
+    		<span id='top_font'>Item Tracker</span>
+    		<span id='top_button'><a onClick={this.toggle}><span className="glyphicon glyphicon-plus"></span></a></span>
+    	</div>
+      {this.state.inputHidden ? <Placehold/> : <NewItemRequest/>}
+      </div>
+    );
+  }
+});
+
+var Main = React.createClass({
   render: function() {
     return (
-        <div className="commentBox">
-          <Item name='Bleach' status='Awating Approval' date='Some Radnom Time' reason='Do I need one?'/>
+        <div>
+          <NavBar/>
+
+            <div id='item-list' className='material-card'>
+              <ItemList />
+            </div>
         </div>
     );
     }
   });
   React.render(
-    <ItemList />,	document.getElementById('content')
+    <Main />,	document.getElementById('react_content')
 );
