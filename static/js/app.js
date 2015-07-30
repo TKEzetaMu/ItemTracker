@@ -6,22 +6,25 @@ var Item = React.createClass({
         message = 'Awaiting Approval';
         break;
       case 1:
-        message = 'Approved. Awaiiting Purchase'
+        message = 'Pylo Approved'
         break;
       case 2:
-        message = 'Closed';
+        message = 'Cryso Approved';
         break;
       case 3:
-        message = 'Request Denied'
+        message = 'Approved. Awaiting Purchase';
+        break;
+      case 4:
+        message = 'Denied';
         break;
       default:
         message = 'Unknown'
         break;
     }
-    return <span id='status_message' className='hidden-xs'>{message}</span>
+    return <span className='right'>{message}</span>
   },
   createName: function(name){
-    return <span className="itemName">{name}</span>;
+    return <span className="card-title activator grey-text text-darken-4">{name}</span>;
   },
   sanitizeLink: function(link){
     return <a href={link}>Link</a>;
@@ -38,13 +41,19 @@ var Item = React.createClass({
   "July", "August", "September", "October", "November", "December"
 ];
     var d = new Date(Date.parse(date));
-    return <div id="date">{this.createDate(date)} | <a href={link}>Link</a></div>;
+    return <div>{this.createDate(date)} | <a href={link}>Link</a></div>;
   },
   render: function(){
     return (
-      <div className='item'>
-        {this.createName(this.props.name)} {this.getStatusMessage(this.props.status)}{this.createDateAndLink(this.props.date, this.props.link)}<br/>
-        <div className='reason'>{this.props.reason}</div>
+      <div className='card'>
+        <div className='card-content'>
+          {this.createName(this.props.name)}{this.getStatusMessage(this.props.status)}
+          <p>
+            {this.props.reason}
+          </p>
+          <hr/>
+          {this.createDateAndLink(this.props.date, this.props.link)}
+        </div>
       </div>
     );
   }
@@ -73,13 +82,19 @@ var ItemList = React.createClass({
     this.loadItemsFromServer();
   },
   render: function(){
+    if(this.state.items===undefined){
+      return (<div></div>);
+    }
+    if(this.state.items.length == 0){
+      return (<div></div>);
+    }
     var itemNodes = this.state.items.map(function(item){
       return (
-        <Item name={item.name} status={item.status} date={item.date} reason={item.reason} urlsafe={item.urlsafe} link={item.link}/>
+        <Item name={item.name} status={item.status} date={item.date} reason={item.reason} urlsafe={item.urlsafeX} link={item.link}/>
       );
     });
     return (
-      <div className='items'>
+      <div>
         {this.state.items != 0 ? itemNodes : ''}
       </div>
     );
@@ -98,21 +113,20 @@ var NewItemRequest = React.createClass({
     if(!name || !email || !reason){
       return;
     }
-
-
-
     var data_;
 
     data_ = {
       'name':name,
       'link':url,
-      'reason':reason
+      'reason':reason,
+      'requested_by':email
     };
     console.log(data_);
     $.ajax({
       url: '/_ah/api/items_api/v1/item',
       dataType: 'json',
       type: 'POST',
+      contentType: 'application/json',
       data: JSON.stringify(data_),
       success: function(data) {
         console.log("Sucess!");
@@ -122,7 +136,7 @@ var NewItemRequest = React.createClass({
         React.findDOMNode(this.refs.reason).value = '';
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error('/_ah/api/items_api/v1/item', status, err.toString());
+        console.log(xhr.responseText);
       }.bind(this)
     });
 
@@ -130,62 +144,79 @@ var NewItemRequest = React.createClass({
     return;
   },
   render: function(){
+    if(this.props.hidden){
+      return(<div></div>);
+    }
     return (
-      <div className = "material-card" id = "input-form">
-        <form className='item_form' onSubmit={this.submitForm}>
-          <input type='text' ref='name_' placeholder='Item Name' className='input-element' required/><br/>
-          <input type='email' ref='email' placeholder='E-Mail' className='input-element' required/><br/>
-          <input type='url' ref='url' placeholder='Link to Item' className='input-element'/><br/>
-          <textarea row='40' ref='reason' columns='4' placeholder='Reason' className='input-element' required>
-          </textarea><br/>
-          <input type='submit' placeholder='Request Item'/>
-        </form>
+      <div className = "card">
+        <div className='card-content'>
+          <form onSubmit={this.submitForm}>
+            <input type='text' ref='name_' placeholder='Item Name' className='input-element' required/><br/>
+            <input type='email' ref='email' placeholder='E-Mail' className='input-element' required/><br/>
+            <input type='url' ref='url' placeholder='Link to Item' className='input-element'/><br/>
+            <textarea row='40' ref='reason' columns='4' placeholder='Reason' className='input-element' required>
+            </textarea><br/>
+            <input type='submit' placeholder='Request Item'/>
+          </form>
+        </div>
       </div>
     );
   }
 });
 
-var Placehold = React.createClass({
+var NavBar = React.createClass({
   render: function(){
-    return(<div id='placehold'>
-
-    </div>);
-
-
+    return (
+      <nav>
+        <div className="nav-wrapper red darken-4">
+          <a href="#" className="brand-inset">Item Tracker</a>
+          <ul id="nav-mobile" className="right">
+            <li><a onClick={this.props.onToggle}><i className="material-icons">playlist_add</i></a></li>
+          </ul>
+        </div>
+      </nav>
+    );
   }
 });
 
-var NavBar = React.createClass({
-  getInitialState: function(){
-    return {
-      inputHidden: true
-    };
-  },
-  toggle: function(){
-    this.setState({ inputHidden: !this.state.inputHidden });
-  },
+var PageContent = React.createClass({
+
   render: function(){
-    return (
-      <div>
-      <div className="top_bar">
-    		<span id='top_font'>Item Tracker</span>
-    		<span id='top_button'><a onClick={this.toggle}><span className="glyphicon glyphicon-plus"></span></a></span>
-    	</div>
-      {this.state.inputHidden ? <Placehold/> : <NewItemRequest/>}
-      </div>
+    return(
+
+        <div className='row'>
+
+          <div className='col m8 s12 offset-m2 hide-on-large-only'>
+            <NewItemRequest hidden={this.props.hidden}/>
+          </div>
+          <div className='col s12 l8 offset-l2'>
+            <ItemList/>
+          </div>
+          <div className='col l2 hide-on-med-and-down'>
+            <NewItemRequest hidden={this.props.hidden}/>
+          </div>
+
+        </div>
+
     );
   }
 });
 
 var Main = React.createClass({
+  getInitialState: function(){
+    return{
+      inputHidden: true
+    }
+  },
+  toggleState: function(){
+    this.setState({ inputHidden: !this.state.inputHidden });
+  },
   render: function() {
+    var bindClick = this.toggleState.bind(this);
     return (
         <div>
-          <NavBar/>
-
-            <div id='item-list' className='material-card'>
-              <ItemList />
-            </div>
+          <NavBar  onToggle={bindClick}/>
+          <PageContent hidden={this.state.inputHidden}/>
         </div>
     );
     }

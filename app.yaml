@@ -2,12 +2,15 @@ version: 1
 runtime: python27
 api_version: 1
 threadsafe: true
+application: item-tracker
 
 handlers:
 - url: /static/css
   static_dir: static/css
 - url: /static/js
   static_dir: static/js
+- url: /static/font
+  static_dir: static/font
 - url: /_ah/spi/.*
   script: item_tracker_api.app
 - url: /.*

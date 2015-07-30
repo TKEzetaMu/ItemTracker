@@ -16,9 +16,21 @@ class StaticCreateItemHandler(webapp2.RequestHandler):
 		self.response.headers['Content-Type'] = 'text/plain'
 		self.response.write('Items Go Here')
 
+class StaticApproveItemsHandler(webapp2.RequestHandler):
+    def get(self):
+        try:
+            f = open('static/approve.html')
+            self.response.headers['Content-Type'] = 'text/html'
+            self.response.write(f.read())
+            f.close()
+        except IOError:
+            self.response.headers['Content-Type'] = 'text/plain'
+            self.response.write('Error')
+            self.error(401)
 
 
 app = webapp2.WSGIApplication([
     ('/', StaticIndexHandler),
     ('/items',StaticCreateItemHandler),
+    ('/approve',StaticApproveItemsHandler)
 ], debug=True)
