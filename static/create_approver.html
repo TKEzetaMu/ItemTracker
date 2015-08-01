@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Item Tracker - Create Approver</title>
+
+	<!--Import materialize.css-->
+  <link type="text/css" rel="stylesheet" href="/static/css/materialize.min.css"  media="screen,projection"/>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript" src="/static/js/materialize.min.js"></script>
+
+
+	<link rel="stylesheet" href="/static/css/global.css">
+</head>
+<body>
+  <div class='page'>
+    <nav>
+  <div class="nav-wrapper red darken-4">
+    <a href="#" class="brand-inset">Item Tracker - Add Approver</a>
+  </div>
+</nav>
+	<div class="container">
+    <div class='card'>
+      <div class='card-content'>
+      <form action="/admin/create" method="post">
+        <div><input type="email" placeholder='E-Mail' class='input-element' name="email"/></div>
+        <div><input type="text" placeholder='Position' class='input-element' name="position"/></div>
+        <div><input type="submit" value="Add Approver"></div>
+      </form>
+    </div>
+  </div>
+  </div>
+</div>
+</body>
+</html>

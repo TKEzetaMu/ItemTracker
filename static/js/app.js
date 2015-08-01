@@ -17,11 +17,14 @@ var Item = React.createClass({
       case 4:
         message = 'Denied';
         break;
+      case 5:
+        message = 'Purchased';
+        break;
       default:
         message = 'Unknown'
         break;
     }
-    return <span className='right'>{message}</span>
+    return <span className='right hide-on-small-only'>{message}</span>
   },
   createName: function(name){
     return <span className="card-title activator grey-text text-darken-4">{name}</span>;
@@ -36,25 +39,46 @@ var Item = React.createClass({
     var d = new Date(Date.parse(date));
     return monthNames[d.getMonth()] + " " + d.getDay()
   },
-  createDateAndLink: function(date, link){
+  createDateAndLink: function(date, link, cost){
     var monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
     var d = new Date(Date.parse(date));
-    return <div>{this.createDate(date)} | <a href={link}>Link</a></div>;
+    var price = (cost != '') ? !(cost === undefined) ? ' | Price: $'+cost : '' : '';
+    return <div>{this.createDate(date)} | <a href={link}>Link</a>{price}</div>;
   },
   render: function(){
     return (
       <div className='card'>
         <div className='card-content'>
           {this.createName(this.props.name)}{this.getStatusMessage(this.props.status)}
-          <p>
+          <p className='hide-on-small-only'>
             {this.props.reason}
           </p>
+          <br/>
           <hr/>
-          {this.createDateAndLink(this.props.date, this.props.link)}
+          {this.createDateAndLink(this.props.date, this.props.link, this.props.cost)}
         </div>
       </div>
+    );
+  }
+});
+
+var Loader = React.createClass({
+  render: function(){
+    return(
+      <div className="preloader-wrapper big active">
+        <div className="spinner-layer spinner-red-only">
+          <div className="circle-clipper left">
+            <div className="circle"></div>
+          </div>
+          <div className="gap-patch">
+            <div className="circle"></div>
+          </div><div className="circle-clipper right">
+          <div className="circle"></div>
+        </div>
+      </div>
+    </div>
     );
   }
 });
@@ -62,7 +86,8 @@ var Item = React.createClass({
 var ItemList = React.createClass({
   getInitialState: function(){
     return {
-      items:[]
+      items:[],
+      loaded: false
     };
   },
   loadItemsFromServer: function(){
@@ -71,7 +96,7 @@ var ItemList = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({items: data.items});
+        this.setState({items: data.items, loaded: true});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -82,15 +107,40 @@ var ItemList = React.createClass({
     this.loadItemsFromServer();
   },
   render: function(){
-    if(this.state.items===undefined){
-      return (<div></div>);
+    if(this.state.items===undefined && !this.state.loaded){
+      return (
+        <div className='card'>
+          <div className='card-content center-align'>
+            <Loader/>
+          </div>
+        </div>
+      );
     }
-    if(this.state.items.length == 0){
-      return (<div></div>);
+    else if(this.state.items.length == 0 && !this.state.loaded){
+      return (<div className='card'>
+        <div className='card-content center-align'>
+          <Loader/>
+        </div>
+      </div>);
     }
+    else if(this.state.items===undefined && this.state.loaded){
+      return (<div className='card'>
+        <div className='card-content center-align'>
+          There are no items to review!
+        </div>
+      </div>);
+    }
+    else if(this.state.items.length == 0 && this.state.loaded){
+      return (<div className='card'>
+        <div className='card-content center-align'>
+          There are no items to review!
+        </div>
+      </div>);
+    }
+
     var itemNodes = this.state.items.map(function(item){
       return (
-        <Item name={item.name} status={item.status} date={item.date} reason={item.reason} urlsafe={item.urlsafeX} link={item.link}/>
+        <Item name={item.name} status={item.status} date={item.date} reason={item.reason} urlsafe={item.urlsafeX} link={item.link} cost={item.cost}/>
       );
     });
     return (
@@ -109,6 +159,7 @@ var NewItemRequest = React.createClass({
     var email = React.findDOMNode(this.refs.email).value;
     var url = React.findDOMNode(this.refs.url).value;
     var reason = React.findDOMNode(this.refs.reason).value;
+    var cost = React.findDOMNode(this.refs.cost).value;
 
     if(!name || !email || !reason){
       return;
@@ -119,7 +170,8 @@ var NewItemRequest = React.createClass({
       'name':name,
       'link':url,
       'reason':reason,
-      'requested_by':email
+      'requested_by':email,
+      'cost':cost
     };
     console.log(data_);
     $.ajax({
@@ -134,6 +186,7 @@ var NewItemRequest = React.createClass({
         React.findDOMNode(this.refs.email).value = '';
         React.findDOMNode(this.refs.url).value = '';
         React.findDOMNode(this.refs.reason).value = '';
+        React.findDOMNode(this.refs.cost).value = '';
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(xhr.responseText);
@@ -154,6 +207,7 @@ var NewItemRequest = React.createClass({
             <input type='text' ref='name_' placeholder='Item Name' className='input-element' required/><br/>
             <input type='email' ref='email' placeholder='E-Mail' className='input-element' required/><br/>
             <input type='url' ref='url' placeholder='Link to Item' className='input-element'/><br/>
+            <input type='number' ref='cost' placeholder='Cost Estimate' className='input-element'/><br/>
             <textarea row='40' ref='reason' columns='4' placeholder='Reason' className='input-element' required>
             </textarea><br/>
             <input type='submit' placeholder='Request Item'/>
@@ -171,7 +225,7 @@ var NavBar = React.createClass({
         <div className="nav-wrapper red darken-4">
           <a href="#" className="brand-inset">Item Tracker</a>
           <ul id="nav-mobile" className="right">
-            <li><a onClick={this.props.onToggle}><i className="material-icons">playlist_add</i></a></li>
+            <li><a onClick={this.props.onToggle}><i className="material-icons mobile-click">playlist_add</i></a></li>
           </ul>
         </div>
       </nav>

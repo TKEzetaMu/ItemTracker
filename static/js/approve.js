@@ -13,6 +13,25 @@ var NavBar = React.createClass({
   }
 });
 
+var Loader = React.createClass({
+  render: function(){
+    return(
+      <div className="preloader-wrapper big active">
+        <div className="spinner-layer spinner-red-only">
+          <div className="circle-clipper left">
+            <div className="circle"></div>
+          </div>
+          <div className="gap-patch">
+            <div className="circle"></div>
+          </div><div className="circle-clipper right">
+          <div className="circle"></div>
+        </div>
+      </div>
+    </div>
+    );
+  }
+});
+
 var Item = React.createClass({
   loadFromServer: function(){
     $.ajax({
@@ -132,18 +151,7 @@ var Item = React.createClass({
           <div className='container'>
             <div className='card'>
               <div className='card-content center-align'>
-                <div className="preloader-wrapper big active">
-                  <div className="spinner-layer spinner-red-only">
-                    <div className="circle-clipper left">
-                      <div className="circle"></div>
-                    </div><div className="gap-patch">
-                    <div className="circle"></div>
-                  </div><div className="circle-clipper right">
-                  <div className="circle"></div>
-                </div>
-              </div>
-            </div>
-
+                <Loader/>
               </div>
             </div>
           </div>
@@ -161,8 +169,8 @@ var Item = React.createClass({
             </p>
             <br/>
             <br/>
-            <a className="waves-effect waves-light btn space-right" onClick={this.approveItem}>Approve</a>
-            <a className="waves-effect waves-light btn" onClick={this.declineItem}>Deny</a>
+            <a className="waves-effect waves-light btn space-right mobile-click" onClick={this.approveItem}>Approve</a>
+            <a className="waves-effect waves-light btn mobile-click" onClick={this.declineItem}>Deny</a>
           </div>
         </div>
       </div>

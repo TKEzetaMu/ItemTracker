@@ -3,8 +3,12 @@ API for the Backend System
 '''
 
 import endpoints
-
+import models.ndb_models as ndb_models
 from google.appengine.ext import ndb
+
+from google.appengine.api import mail
+
+
 from protorpc import remote
 from protorpc import messages
 from protorpc import message_types
@@ -13,25 +17,7 @@ from protorpc import message_types
 #from endpoints_proto_datastore.ndb import EndpointsModel
 
 
-# NDB Model
-# Used to store the item in NDB. Note the required properties
-class ItemModel(ndb.Model):
-    # Name of the Item
-    name = ndb.StringProperty(required = True)
-    # Reason it is Required
-    reason = ndb.StringProperty(required = True)
-    # Who requested the item?
-    requested_by = ndb.StringProperty(required = True)
-    # Link to the resource
-    link = ndb.StringProperty()
-    # Date Requested
-    date = ndb.DateTimeProperty(auto_now_add = True)
-    # Did the Cryso Approve It?
-    cryso_approved = ndb.BooleanProperty()
-    # Did the Pylo Approve It?
-    pylo_approved = ndb.BooleanProperty()
-    # Status of the Request
-    status = ndb.IntegerProperty()
+
 
 # This is the request and the response when you make an item
 class MakeItemRequestResponse(messages.Message):
@@ -43,10 +29,12 @@ class MakeItemRequestResponse(messages.Message):
     reason = messages.StringField(2, required = True)
     # Who requested it
     requested_by = messages.StringField(3, required = True)
+    # Cost
+    cost = messages.FloatField(4)
     # Optional Link(Url)
-    link = messages.StringField(4)
+    link = messages.StringField(5)
     #only used for response
-    urlsafeX = messages.StringField(5)
+    urlsafeX = messages.StringField(6)
 
 class ItemResponse(messages.Message):
     # Here we are only requested the two required properties and an optional link. The next ones can be inferred or default
@@ -70,6 +58,8 @@ class ItemResponse(messages.Message):
     # Status of the Request
     status = messages.IntegerField(9)
 
+    cost = messages.FloatField(10)
+
 # List of items
 class ItemResponseList(messages.Message):
     items = messages.MessageField(ItemResponse, 1, repeated = True)
@@ -92,14 +82,39 @@ class ItemIdRequest(messages.Message):
 @endpoints.api(name = 'items_api', version='v1', description='API for the Item Tracker')
 class ItemsApi(remote.Service):
 
+    def notify_new_item(self,item):
+        for approver in ndb_models.Approver.query():
+            is_pylo = approver.position=='pylo'
+            is_cryso = approver.position=='cryso'
+            if(is_pylo or is_cryso):
+                base_url = 'https://item-tracker.appspot.com/approve?id='+item.key.urlsafe()
+                url = ''
+                if is_pylo:
+                    url = base_url+'&pylo=1'
+                elif is_cryso:
+                    url = base_url+'&cryso=1'
+                message = mail.EmailMessage(sender='Item Tracker API<notify@item-tracker.appspotmail.com>', subject='New Item Request')
+                message.to = approver.email
+                message.body = """
+Sup Champ,
+
+You have a new item request waiting at:"""+url+"""
+
+Thanks,
+
+Item Tracker Support
+"""
+                message.send()
+
     @endpoints.method(MakeItemRequestResponse, ItemResponse,
     path='item', http_method='POST',
     name='items.make')
     def make_item(self, request):
         try:
-            item = ItemModel(name = request.name, reason = request.reason, link = request.link, cryso_approved = False, pylo_approved = False, status = 0, requested_by = request.requested_by)
+            item = ndb_models.ItemModel(name = request.name, reason = request.reason, link = request.link, cryso_approved = False, pylo_approved = False, status = 0, requested_by = request.requested_by, cost = request.cost)
             item.put()
-            response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by)
+            self.notify_new_item(item)
+            response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost)
             return response
         except ValueError:
             self.error(401)
@@ -139,8 +154,8 @@ class ItemsApi(remote.Service):
     name = 'items.list')
     def get_items(self,request):
         items_ = []
-        for item in ItemModel.query():
-            items_.append(ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = item.status, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by))
+        for item in ndb_models.ItemModel.query():
+            items_.append(ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = item.status, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost))
         return ItemResponseList(items = items_)
 
     @endpoints.method(ItemIdRequest, ItemResponse,
@@ -149,7 +164,7 @@ class ItemsApi(remote.Service):
     def get_item(self,request):
         item_key = ndb.Key(urlsafe=request.identifier)
         item = item_key.get()
-        response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by)
+        response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost)
         return response
 
     # @Item.method(path='item', http_method='POST', name='item.insert')

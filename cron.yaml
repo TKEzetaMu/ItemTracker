@@ -1,0 +1,4 @@
+cron:
+- description: clear obsolete items
+  url: /jobs/delete
+  schedule: every monday 09:00
