@@ -13,7 +13,7 @@ handlers:
   static_dir: static/font
 - url: /_ah/spi/.*
   script: item_tracker_api.app
-- url: /jobs/delete
+- url: /jobs/.*
   script: cron_jobs.cronApp
   login: admin
 - url : /admin/create

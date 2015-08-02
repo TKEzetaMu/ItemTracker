@@ -75,6 +75,8 @@ class ChangeItemRequestResponse(messages.Message):
     # Status of the Request
     status = messages.IntegerField(4)
 
+    reason = messages.StringField(5)
+
 class ItemIdRequest(messages.Message):
     # NDB id
     identifier = messages.StringField(1, required = True)
@@ -105,6 +107,37 @@ Thanks,
 Item Tracker Support
 """
                 message.send()
+    def decline_with_reason(self, item, reason):
+        message = mail.EmailMessage(sender='Item Tracker API<notify@item-tracker.appspotmail.com>', subject='Item Denied')
+        message.to = item.requested_by
+
+        message.body="""
+Sup Champ,
+
+The Item Request for """+item.name+""" has been denied for the following reason:
+
+"""+str(reason)+"""
+
+Thanks,
+
+Item Tracker Support
+"""
+        message.send()
+
+    def approve(self,item):
+        message = mail.EmailMessage(sender='Item Tracker API<notify@item-tracker.appspotmail.com>', subject='Item Denied')
+        message.to = item.requested_by
+
+        message.body="""
+Sup Champ,
+
+The Item Request for """+item.name+""" has been approved. You may purchase the item.
+
+Thanks,
+
+Item Tracker Support
+"""
+        message.send()
 
     @endpoints.method(MakeItemRequestResponse, ItemResponse,
     path='item', http_method='POST',
@@ -147,6 +180,13 @@ Item Tracker Support
             item.pylo_approved = False;
             item.cryso_approved = False;
         item.put()
+
+        #Now we can email people
+        if(item.status == 4):
+            self.decline_with_reason(item, request.reason)
+        elif(item.status == 5):
+            self.approve(item)
+
         return request
 
     @endpoints.method(message_types.VoidMessage, ItemResponseList,

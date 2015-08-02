@@ -88,9 +88,17 @@ var Item = React.createClass({
     if((this.state.cryso==undefined)&&(this.state.pylo===undefined)){
       return;
     }
+    var reason = React.findDOMNode(this.refs.reason).value;
+
+    if(reason==''){
+      Materialize.toast('No Reason!', 4000)
+      return;
+    }
+
     data_ = {
       'identifier':this.state.id,
-      'status':4
+      'status':4,
+      'reason':reason
     };
     $.ajax({
       url: '/_ah/api/items_api/v1/item/change',
@@ -169,6 +177,7 @@ var Item = React.createClass({
             </p>
             <br/>
             <br/>
+            <textarea cols='40' rows='5' placeholder='Reason for Denial' ref='reason' classname='input-element'></textarea>
             <a className="waves-effect waves-light btn space-right mobile-click" onClick={this.approveItem}>Approve</a>
             <a className="waves-effect waves-light btn mobile-click" onClick={this.declineItem}>Deny</a>
           </div>

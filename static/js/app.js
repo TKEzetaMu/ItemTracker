@@ -36,8 +36,9 @@ var Item = React.createClass({
     var monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+
     var d = new Date(Date.parse(date));
-    return monthNames[d.getMonth()] + " " + d.getDay()
+    return monthNames[d.getMonth()] + " " + d.getDate()
   },
   createDateAndLink: function(date, link, cost){
     var monthNames = ["January", "February", "March", "April", "May", "June",
@@ -207,7 +208,7 @@ var NewItemRequest = React.createClass({
             <input type='text' ref='name_' placeholder='Item Name' className='input-element' required/><br/>
             <input type='email' ref='email' placeholder='E-Mail' className='input-element' required/><br/>
             <input type='url' ref='url' placeholder='Link to Item' className='input-element'/><br/>
-            <input type='number' ref='cost' placeholder='Cost Estimate' className='input-element'/><br/>
+            <input type='number' ref='cost' placeholder='Cost Estimate' className='input-element' step='0.01'/><br/>
             <textarea row='40' ref='reason' columns='4' placeholder='Reason' className='input-element' required>
             </textarea><br/>
             <input type='submit' placeholder='Request Item'/>
