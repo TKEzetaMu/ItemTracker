@@ -80,7 +80,7 @@ var Item = React.createClass({
         Materialize.toast('Success!', 4000) // 4000 is the duration of the toast
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error('/_ah/api/items_api/v1/item', status, err.toString());
+        console.log(xhr.responseText);
       }.bind(this)
     });
   },

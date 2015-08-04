@@ -2,17 +2,17 @@ import models.ndb_models as ndb_models
 import webapp2
 import os
 
-MAIN_PAGE_HTML = """\
-<html>
-  <body>
-    <form action="/admin/create" method="post">
-      <div><input type="email" name="email"/></div>
-      <div><input type="text" name="position"/></div>
-      <div><input type="submit" value="Sign Guestbook"></div>
-    </form>
-  </body>
-</html>
-"""
+import os
+import urllib
+
+from google.appengine.ext import ndb
+
+import jinja2
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/static'),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
 
 # Handled Automatic Deletion of Items that Are Either Purchased or Rejected
 class CreateApprover(webapp2.RequestHandler):
@@ -23,10 +23,19 @@ class CreateApprover(webapp2.RequestHandler):
         approver.put()
         self.redirect('/')
     def get(self):
+        '''
         f = open('static/create_approver.html')
     	self.response.headers['Content-Type'] = 'text/html'
         self.response.write(f.read())
         f.close()
+        '''
+        approvers = ndb_models.Approver.query()
+        template_values = {
+            'approvers': approvers,
+        }
+        self.response.headers['Content-Type'] = 'text/html'
+        template = JINJA_ENVIRONMENT.get_template('create_approver.html')
+        self.response.write(template.render(template_values))
 
 
 app = webapp2.WSGIApplication([

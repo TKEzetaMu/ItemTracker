@@ -20,6 +20,7 @@ handlers:
   script: admin_config.app
   login: admin
 - url: /.*
+  secure: always
   script: item_tracker.app
 
 libraries:
@@ -29,3 +30,5 @@ libraries:
   version: "2.6"
 - name: endpoints
   version: 1.0
+- name: jinja2
+  version: latest

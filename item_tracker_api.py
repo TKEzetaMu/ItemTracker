@@ -64,6 +64,9 @@ class ItemResponse(messages.Message):
 class ItemResponseList(messages.Message):
     items = messages.MessageField(ItemResponse, 1, repeated = True)
 
+class ItemsQueryList(messages.Message):
+    status = messages.IntegerField(1)
+
 # This is what allows someone to change an item
 class ChangeItemRequestResponse(messages.Message):
     # NDB id
@@ -125,7 +128,7 @@ Item Tracker Support
         message.send()
 
     def approve(self,item):
-        message = mail.EmailMessage(sender='Item Tracker API<notify@item-tracker.appspotmail.com>', subject='Item Denied')
+        message = mail.EmailMessage(sender='Item Tracker API<notify@item-tracker.appspotmail.com>', subject='Item Approved')
         message.to = item.requested_by
 
         message.body="""
@@ -179,6 +182,8 @@ Item Tracker Support
             item.status = 4;
             item.pylo_approved = False;
             item.cryso_approved = False;
+        elif(request.status == 5):
+            item.status = 5
         item.put()
 
         #Now we can email people
@@ -189,14 +194,6 @@ Item Tracker Support
 
         return request
 
-    @endpoints.method(message_types.VoidMessage, ItemResponseList,
-    path='items', http_method='GET',
-    name = 'items.list')
-    def get_items(self,request):
-        items_ = []
-        for item in ndb_models.ItemModel.query():
-            items_.append(ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = item.status, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost))
-        return ItemResponseList(items = items_)
 
     @endpoints.method(ItemIdRequest, ItemResponse,
     path='item', http_method='GET',
@@ -206,6 +203,21 @@ Item Tracker Support
         item = item_key.get()
         response = ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = 0, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost)
         return response
+
+    @endpoints.method(ItemsQueryList, ItemResponseList,
+    path='items', http_method='GET',
+    name = 'items.all')
+    def get_items(self,request):
+        items_ = []
+        if(request.status > 1):
+            for item in ndb_models.ItemModel.query(ndb_models.ItemModel.status == request.status).order(-ndb_models.ItemModel.date):
+                items_.append(ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = item.status, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost))
+            return ItemResponseList(items = items_)
+        else:
+            for item in ndb_models.ItemModel.query().order(-ndb_models.ItemModel.date):
+                items_.append(ItemResponse(name = item.name, reason = item.reason, link = item.link, cryso_approved = item.cryso_approved, pylo_approved = item.pylo_approved, status = item.status, urlsafe = item.key.urlsafe(), date = item.date.isoformat(), requested_by = item.requested_by, cost = item.cost))
+            return ItemResponseList(items = items_)
+
 
     # @Item.method(path='item', http_method='POST', name='item.insert')
     # def ItemInsert(self, item_):

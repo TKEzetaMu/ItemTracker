@@ -21,6 +21,18 @@
   cursor: pointer;
 }
 
+.badge-width{
+  margin-right: 100px;
+}
+
+.custom-badge{
+  background-color: white;
+  color: #b71c1c;
+  padding: 8px;
+  border-radius: 5px;
+
+}
+
 /**Old CSS*/
 #centered{
   text-align: center;

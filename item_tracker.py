@@ -2,6 +2,8 @@ import os
 import urllib
 import webapp2
 
+
+
 # Send's back the static HTML for the Index Page
 class StaticIndexHandler(webapp2.RequestHandler):
     def get(self):
@@ -29,8 +31,17 @@ class StaticApproveItemsHandler(webapp2.RequestHandler):
             self.error(401)
 
 
+
+
+class StaticBuyItemsHandler(webapp2.RequestHandler):
+    def get(self):
+        f = open('static/buy.html')
+    	self.response.headers['Content-Type'] = 'text/html'
+        self.response.write(f.read())
+        f.close()
+
 app = webapp2.WSGIApplication([
     ('/', StaticIndexHandler),
-    ('/items',StaticCreateItemHandler),
+    ('/buy',StaticBuyItemsHandler),
     ('/approve',StaticApproveItemsHandler)
 ], debug=True)

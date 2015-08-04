@@ -1,3 +1,19 @@
+var NavBar = React.createClass({
+  render: function() {
+    return (
+      <nav>
+        <div className="nav-wrapper red darken-4">
+          <a className="brand-inset hide-on-small-only" href="/buy">Item Tracker - Buy</a>
+          <a className="brand-inset hide-on-med-and-up" href="/buy">Buy</a>
+          <ul className="right" id="nav-mobile">
+
+          </ul>
+        </div>
+      </nav>
+    );
+  }
+});
+
 var Item = React.createClass({
   getStatusMessage: function(status) {
     var message = '';
@@ -50,8 +66,28 @@ var Item = React.createClass({
         ? ' | Price: $' + cost
         : ''
         : '';
-    return <div>{this.createDate(date)} |
-        <a href={link}>Link</a>{price}</div>;
+    return <div>{this.createDate(date)} | <a href={link}>Link</a>{price}</div>;
+  },
+  buyItem: function(){
+    data_ = {
+      'identifier':this.props.urlsafe,
+      'status':5
+    };
+    console.log(data_);
+    $.ajax({
+      url: '/_ah/api/items_api/v1/item/change',
+      dataType: 'json',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(data_),
+      success: function(data) {
+        console.log("Sucess!");
+        Materialize.toast('Bought!', 4000) // 4000 is the duration of the toast
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error('/_ah/api/items_api/v1/item', status, err.toString());
+      }.bind(this)
+    });
   },
   render: function() {
     return (
@@ -64,6 +100,8 @@ var Item = React.createClass({
           <br/>
           <hr/>
           {this.createDateAndLink(this.props.date, this.props.link, this.props.cost)}
+          <br/>
+          <a className="waves-effect waves-light btn space-right mobile-click" onClick={this.buyItem}>Buy</a>
         </div>
       </div>
     );
@@ -111,7 +149,7 @@ var ItemList = React.createClass({
     }
     var itemNodes = this.props.items.map(function(item) {
       return (
-        <Item cost={item.cost} date={item.date} link={item.link} name={item.name} reason={item.reason} status={item.status} urlsafe={item.urlsafeX}/>
+        <Item cost={item.cost} date={item.date} link={item.link} name={item.name} reason={item.reason} status={item.status} urlsafe={item.urlsafe}/>
       );
     });
     return (
@@ -120,93 +158,6 @@ var ItemList = React.createClass({
       </div>
     );
 
-  }
-});
-
-var NewItemRequest = React.createClass({
-  submitForm: function(e) {
-    e.preventDefault();
-    var name = React.findDOMNode(this.refs.name_).value;
-    var email = React.findDOMNode(this.refs.email).value;
-    var url = React.findDOMNode(this.refs.url).value;
-    var reason = React.findDOMNode(this.refs.reason).value;
-    var cost = React.findDOMNode(this.refs.cost).value;
-
-    if (!name || !email || !reason) {
-      return;
-    }
-    var data_;
-
-    data_ = {
-      'name': name,
-      'link': url,
-      'reason': reason,
-      'requested_by': email,
-      'cost': cost
-    };
-    console.log(data_);
-    $.ajax({
-      url: '/_ah/api/items_api/v1/item',
-      dataType: 'json',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(data_),
-      success: function(data) {
-        this.props.onSuccessAdd(data);
-        React.findDOMNode(this.refs.name_).value = '';
-        React.findDOMNode(this.refs.email).value = '';
-        React.findDOMNode(this.refs.url).value = '';
-        React.findDOMNode(this.refs.reason).value = '';
-        React.findDOMNode(this.refs.cost).value = '';
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.log(xhr.responseText);
-      }.bind(this)
-    });
-    return;
-  },
-  render: function() {
-    if (this.props.hidden) {
-      return (
-        <div></div>
-      );
-    }
-    return (
-      <div className="card">
-        <div className='card-content'>
-          <form onSubmit={this.submitForm}>
-            <input className='input-element' placeholder='Item Name' ref='name_'  type='text' required/><br/>
-              <input className='input-element' placeholder='E-Mail' ref='email' type='email' required/><br/>
-                <input className='input-element' placeholder='Link to Item' ref='url' type='url'/><br/>
-                <input className='input-element' placeholder='Cost Estimate' ref='cost' step='0.01' type='number'/><br/>
-                <textarea className='input-element' columns='4' placeholder='Reason' ref='reason' required row='40'></textarea><br/>
-                <input placeholder='Request Item' type='submit'/>
-              </form>
-            </div>
-          </div>
-    );
-  }
-});
-
-var NavBar = React.createClass({
-  render: function() {
-    return (
-      <nav>
-        <div className="nav-wrapper red darken-4">
-          <a className="brand-inset hide-on-small-only" href="#">Item Tracker</a>
-          <a className="brand-inset hide-on-med-and-up" href="#">Tracker</a>
-          <ul className="right" id="nav-mobile">
-            <li><a href={this.props.readyToBuy > 0 ? '/buy' : '#'}><span className='hide-on-small-only'>Buy Items </span><span className='hide-on-med-and-up'>Buy </span><span className={this.props.readyToBuy > 0 ? 'custom-badge' : 'hide'}>{this.props.readyToBuy}</span></a></li>
-            <li>
-              <a onClick={this.props.onToggle}>
-                <i className="material-icons mobile-click">playlist_add</i>
-              </a>
-            </li>
-
-          </ul>
-        </div>
-      </nav>
-    );
   }
 });
 
@@ -228,7 +179,7 @@ var PageContent = React.createClass({
   },
   loadDataFromServer: function() {
     $.ajax({
-      url: '/_ah/api/items_api/v1/items',
+      url: '/_ah/api/items_api/v1/items?status=3',
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -238,7 +189,6 @@ var PageContent = React.createClass({
             loaded: true,
             error: false
           });
-          this.props.onNew(0)
           return;
         }
         this.setState({
@@ -246,13 +196,6 @@ var PageContent = React.createClass({
           loaded: true,
           error: false
         });
-        var count = 0;
-        for(i = 0; i < data.items.length; i++){
-          if(data.items[i].status == 3){
-            count = count + 1;
-          }
-        }
-        this.props.onNew(count)
       }.bind(this),
       error: function(xhr, status, err) {
         this.setState({
@@ -268,16 +211,9 @@ var PageContent = React.createClass({
 
     return (
       <div className='row'>
-        <div className='col m8 s12 offset-m2 hide-on-large-only'>
-          <NewItemRequest hidden={this.props.hidden} onSuccessAdd={this.addItem.bind(this)}/>
-        </div>
         <div className='col s12 l8 offset-l2'>
           <ItemList items={this.state.items} loaded={this.state.loaded}/>
         </div>
-        <div className='col l2 hide-on-med-and-down'>
-          <NewItemRequest hidden={this.props.hidden} onSuccessAdd={this.addItem}/>
-        </div>
-
       </div>
 
     );
@@ -285,30 +221,11 @@ var PageContent = React.createClass({
 });
 
 var Main = React.createClass({
-  getInitialState: function() {
-    return {
-      inputHidden: true,
-      numUnbought: 0
-    }
-  },
-  toggleState: function() {
-    this.setState({
-      inputHidden: !this.state.inputHidden,
-      numUnbought: this.state.numUnbought
-    });
-  },
-  updateUnbought: function(num){
-    this.setState({
-      inputHidden: this.state.inputHidden,
-      numUnbought: num
-    });
-  },
   render: function() {
-    var bindClick = this.toggleState.bind(this);
     return (
       <div>
-        <NavBar onToggle={bindClick} readyToBuy={this.state.numUnbought}/>
-        <PageContent hidden={this.state.inputHidden} onNew={this.updateUnbought}/>
+        <NavBar/>
+        <PageContent/>
       </div>
     );
   }

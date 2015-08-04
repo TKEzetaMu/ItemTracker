@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: ItemModel
+  properties:
+  - name: status
+  - name: date
+    direction: desc
+
 - kind: ItemRequest
   ancestor: yes
   properties:
