@@ -195,7 +195,9 @@ var NavBar = React.createClass({
         <div className="nav-wrapper red darken-4">
           <a className="brand-inset hide-on-small-only" href="#">Item Tracker</a>
           <a className="brand-inset hide-on-med-and-up" href="#">Tracker</a>
+
           <ul className="right" id="nav-mobile">
+            <li><a className='' href='https://github.com/TKEzetaMu/ItemTracker/wiki'><i className='material-icons'>info_outline</i></a></li>
             <li><a href={this.props.readyToBuy > 0 ? '/buy' : '#'}><span className='hide-on-small-only'>Buy Items </span><span className='hide-on-med-and-up'>Buy </span><span className={this.props.readyToBuy > 0 ? 'custom-badge' : 'hide'}>{this.props.readyToBuy}</span></a></li>
             <li>
               <a onClick={this.props.onToggle}>
